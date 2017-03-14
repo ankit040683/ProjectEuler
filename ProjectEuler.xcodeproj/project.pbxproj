@@ -27,6 +27,8 @@
 /* Begin PBXFileReference section */
 		AE33E5591E5EF3B1000BFB21 /* ProjectEuler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ProjectEuler; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE33E55C1E5EF3B1000BFB21 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		AEE8CFF41E77E4A800C8E8F7 /* triangle18.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = triangle18.txt; sourceTree = "<group>"; };
+		AEE8CFF51E77E64700C8E8F7 /* triangle67.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = triangle67.txt; sourceTree = "<group>"; };
 		AEE950281E77BFDF00D802BF /* triangle18.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = triangle18.txt; path = /Users/ankitja/Desktop/Ankit/ProjectEuler/triangle18.txt; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -60,6 +62,8 @@
 		AE33E55B1E5EF3B1000BFB21 /* ProjectEuler */ = {
 			isa = PBXGroup;
 			children = (
+				AEE8CFF51E77E64700C8E8F7 /* triangle67.txt */,
+				AEE8CFF41E77E4A800C8E8F7 /* triangle18.txt */,
 				AE33E55C1E5EF3B1000BFB21 /* main.cpp */,
 			);
 			path = ProjectEuler;

@@ -882,6 +882,19 @@ int maxArray(int *arr, int len)
     return max;
 }
 
+int EvaluateTriangleSum(int **input, int **output, int row, int col)
+{
+    if(col < 0 || col > row || row < 0)
+        return 0;
+    
+    if(output[row][col] == 0)
+    {
+        output[row][col] =  input[row][col] + std::max( EvaluateTriangleSum(input, output, row-1, col), EvaluateTriangleSum(input, output, row-1, col-1) );
+    }
+    
+    return output[row][col];
+}
+
 void Euler18()
 {
     FILE* fp = NULL;
@@ -896,12 +909,29 @@ void Euler18()
             fscanf(fp, "%d", &nTriangles[i][j]);
     }
     
-    // this will be a recursive solution
+    // this will be a recursive solution with DP
+    // allocate memory for holding results
+    int **nTriangleSum = new int*[nLines];
+    for(int i=0; i<nLines; i++)
+    {
+        nTriangleSum[i] = new int[i+1];
+        for(int j=0; j<i+1; j++)
+            nTriangleSum[i][j] = 0;
+    }
     
     for(int i=0; i<nLines; i++)
+        EvaluateTriangleSum(nTriangles, nTriangleSum, nLines-1, i);
+    
+    cout<<maxArray(nTriangleSum[nLines-1], nLines)<<endl;
+    
+    for(int i=0; i<nLines; i++)
+    {
         delete [] nTriangles[i];
+        delete [] nTriangleSum[i];
+    }
     
     delete [] nTriangles;
+    delete [] nTriangleSum;
 }
 
 /*************************************************************************************************
@@ -912,14 +942,51 @@ void Euler18()
 /*************************************************************************************************
  *************************************************************************************************/
 
-
+void Euler67()
+{
+    FILE* fp = NULL;
+    fp = fopen("triangle67.txt", "r");
+    
+    int nLines = 100;
+    int **nTriangles = new int*[nLines];
+    for(int i=0; i<nLines; i++)
+    {
+        nTriangles[i] = new int[i+1];
+        for(int j=0; j<i+1; j++)
+            fscanf(fp, "%d", &nTriangles[i][j]);
+    }
+    
+    // this will be a recursive solution with DP
+    // allocate memory for holding results
+    int **nTriangleSum = new int*[nLines];
+    for(int i=0; i<nLines; i++)
+    {
+        nTriangleSum[i] = new int[i+1];
+        for(int j=0; j<i+1; j++)
+            nTriangleSum[i][j] = 0;
+    }
+    
+    for(int i=0; i<nLines; i++)
+        EvaluateTriangleSum(nTriangles, nTriangleSum, nLines-1, i);
+    
+    cout<<maxArray(nTriangleSum[nLines-1], nLines)<<endl;
+    
+    for(int i=0; i<nLines; i++)
+    {
+        delete [] nTriangles[i];
+        delete [] nTriangleSum[i];
+    }
+    
+    delete [] nTriangles;
+    delete [] nTriangleSum;
+}
 
 /*************************************************************************************************
  *************************************************************************************************/
 
 int main(int argc, const char * argv[]) {
     
-    Euler18();
+    Euler67();
     
     return 0;
 }
