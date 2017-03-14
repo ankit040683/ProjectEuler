@@ -870,6 +870,18 @@ void Euler17()
 /*************************************************************************************************
  *************************************************************************************************/
 
+// returns maximum in an array
+int maxArray(int *arr, int len)
+{
+    int max = arr[0];
+    
+    for(int i=1; i<len; i++)
+        if(arr[i] > max)
+            max = arr[i];
+    
+    return max;
+}
+
 void Euler18()
 {
     FILE* fp = NULL;
@@ -884,7 +896,7 @@ void Euler18()
             fscanf(fp, "%d", &nTriangles[i][j]);
     }
     
-    
+    // this will be a recursive solution
     
     for(int i=0; i<nLines; i++)
         delete [] nTriangles[i];
