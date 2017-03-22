@@ -287,17 +287,15 @@ bool testPrimality(long n)
     while (n%2 == 0)
     {
         return false;
-        n = n/2;
     }
     
     // n must be odd at this point.  So we can skip one element (Note i = i +2)
     for (long i = 3; i <= sqrt(n); i = i+2)
     {
         // While i divides n, print i and divide n
-        while (n%i == 0)
+        if (n%i == 0)
         {
             return false;
-            n = n/i;
         }
     }
     
@@ -1230,6 +1228,62 @@ void Euler23()
 /*************************************************************************************************
  *************************************************************************************************/
 
+void Euler24()
+{
+    int maxNum = 10;
+    
+    // create the array of factorials
+    vector<long> factorials;
+    factorials.push_back(1);
+    for(int i=2; i<maxNum+1; i++)
+    {
+        factorials.push_back( i*factorials[i-2] );
+    }
+    
+    // this is the lexographic permutation we need to find
+    long permutationToFind = 999999;
+    
+    // these are the digits we are trying to arrange
+    vector<int> digits = {0,1,2,3,4,5,6,7,8,9};
+    
+    // this is the final arrangement of digits
+    vector<int> result;
+    
+    // iterate over the factorials array and find it's location
+    for(int i=maxNum-1; i>0; i--)
+    {
+        long remain = permutationToFind % factorials[i-1];
+        long idx= permutationToFind / factorials[i-1];
+        
+        result.push_back(digits[idx]);
+        digits.erase(digits.begin() + idx);
+        
+        if(remain == 0)
+            break;
+        
+        permutationToFind = remain;
+    }
+    
+    // remove all remaining digits and push them in result
+    result.insert(result.end(), digits.begin(), digits.end());
+    
+    for(int i=0; i<result.size(); i++)
+        cout<<result[i];
+    
+    cout<<endl;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
 void Euler67()
 {
     FILE* fp = NULL;
@@ -1274,7 +1328,7 @@ void Euler67()
 
 int main(int argc, const char * argv[]) {
     
-    Euler23();
+    Euler24();
     
     return 0;
 }
