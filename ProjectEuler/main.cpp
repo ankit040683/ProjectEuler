@@ -9,6 +9,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <queue>
 #include <deque>
 #include <stack>
@@ -937,7 +940,292 @@ void Euler18()
 /*************************************************************************************************
  *************************************************************************************************/
 
+void Euler20()
+{
+    vector<int> digits;
+    digits.push_back(1);
+    for(int i=2; i<101; i++)
+    {
+        vector<int> num = longNumber(i);
+        digits = longMult(digits, num);
+    }
+    
+    int sum = 0;
+    for(int i=0; i<digits.size(); i++)
+        sum += digits[i];
+    
+    cout<<sum<<endl;
+}
 
+/*************************************************************************************************
+ *************************************************************************************************/
+
+int sumOfDivisors(int num)
+{
+    // initialize sum
+    int sum = 1;
+    int sqrtNum = sqrt(num);
+    
+    // number till which loop will run
+    int max = sqrtNum+1;
+    
+    // add the square root if perfect square
+    if(sqrtNum*sqrtNum == num)
+    {
+        sum += sqrtNum;
+        max--;
+    }
+    
+    for(int i=2; i<max; i++)
+    {
+        if(num % i == 0)
+            sum += i + num/i;
+    }
+    
+    return sum;
+}
+
+void Euler21()
+{
+    // this is the number uptil which amicable numbers have to be summed
+    int maxNum = 10000;
+    
+    // create a simple array map of numbers and their sum of divisors
+    int *mapSumDivisiors = new int[maxNum];
+    memset(mapSumDivisiors, 0, sizeof(int)*maxNum);
+    
+    // initialize desired sum
+    int sumAmicable = 0;
+    
+    // fill in starting values in sum divisors
+    mapSumDivisiors[0] = 0;
+    mapSumDivisiors[1] = 0;
+    mapSumDivisiors[2] = 1;
+    mapSumDivisiors[3] = 1;
+    
+    // now iterate for the rest of the numbers
+    for(int i=4; i<maxNum; i++)
+    {
+        int sumDivs = sumOfDivisors(i);
+        mapSumDivisiors[i] = sumDivs;
+        
+        if(sumDivs < i && mapSumDivisiors[sumDivs] == i)
+            sumAmicable += i+sumDivs;
+    }
+    
+    cout<<sumAmicable<<endl;
+    
+    delete [] mapSumDivisiors;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+void Euler22()
+{
+    FILE* fp = NULL;
+    fp = fopen("p022_names.txt", "r");
+    
+    char cc;
+    // vector of all names in file
+    vector<string> names;
+    
+    // boolean to track begin or end of name
+    string name = "";
+    while(cc!=EOF)
+    {
+        cc = getc(fp);
+        if(cc == '"')
+        {
+            if(!name.empty())
+            {
+                names.push_back(name);
+                name = "";
+            }
+        }
+        else if(cc != ',')
+        {
+            name += cc;
+        }
+    }
+    
+    // sort the names
+    sort(names.begin(), names.end());
+    
+    long sum = 0;
+    
+    for(int i=0; i<names.size(); i++)
+    {
+        int nameSum = 0;
+        for(int j=0; j<names[i].length(); j++)
+        {
+            nameSum += 1 + names[i][j] - 'A';
+        }
+        
+        sum += nameSum*(i+1);
+    }
+    
+    cout<<sum<<endl;
+    
+    fclose(fp);
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+// input is the number of which we want to get the divisor
+// second input is a map which contains corrpesponding to each number it's set of divisors
+// one big assumption is that we have already found out all the divisors of all the numbers less than the requested number
+const unordered_set<int>& getDivisors(int num, unordered_map<int, unordered_set<int>> &divisorsMap)
+{
+    // check if this number already exists in the map
+    unordered_map<int, unordered_set<int>>::const_iterator result = divisorsMap.find(num);
+    
+    // if found then return result as it is
+    if(result != divisorsMap.end())
+        return result->second;
+    
+    // get the sqrt of number
+    int sqrtNum = sqrt(num);
+    
+    // number till which loop will run
+    int max = sqrtNum+1;
+    
+    // check if this is a perfect square
+    bool bPerfectSquare = false;
+    if(sqrtNum*sqrtNum == num)
+    {
+        bPerfectSquare = true;
+        max--;
+    }
+    
+    for(int i=2; i<max; i++)
+    {
+        if(num % i == 0)
+        {
+            // retrieve the divisors of second number i.e num/i
+            unordered_map<int, unordered_set<int>>::const_iterator divMap = divisorsMap.find(num/i);
+            
+            if(divMap == divisorsMap.end())
+            {
+                // not possible
+                throw "divisors map not created correctly, need to debug";
+            }
+            
+            // create a set from the divisors of second number
+            unordered_set<int> divisors(divMap->second);
+            
+            // now walk over the previous divisors and update if necessary
+            unordered_set<int>::const_iterator divItr = divMap->second.begin();
+            for(; divItr != divMap->second.end(); ++divItr)
+            {
+                divisors.insert( (*divItr) * i );
+            }
+            
+            // for good measure add the perfect square root, might not have been added if it was a prime
+            if(bPerfectSquare)
+                divisors.insert(sqrtNum);
+            
+            // for good measure add num/i as well, might not have been added if it was a prime
+            divisors.insert(num/i);
+            
+            // add this in the map of divisors
+            divisorsMap.insert(make_pair(num, divisors));
+
+            // break now, since we must have updated the divisors
+            return divisorsMap[num];
+        }
+    }
+    
+    // if reached this point then it means no divisor found yet
+    unordered_set<int> divisors;
+    divisors.insert(1);
+    
+    // that means number is prime or square of a prime
+    if(bPerfectSquare)
+        divisors.insert(sqrtNum);
+    
+    // add this in the map of divisors
+    divisorsMap.insert(make_pair(num, divisors));
+    
+    return divisorsMap[num];
+}
+
+void Euler23()
+{
+    // largest number that can not be written as a sum of two abundant numbers
+    int max = 28123;
+    
+    // create the divisors map
+    unordered_map<int, unordered_set<int>> mapOfDivisors;
+    for(int i=2; i<max; i++)
+    {
+        getDivisors(i, mapOfDivisors);
+    }
+    
+    // create array of sum of divisors
+    vector<int> sumOfDivisors;
+    sumOfDivisors.push_back(0);
+    sumOfDivisors.push_back(1);
+    
+    // array of bools which indicate if this is an abundant number
+    vector<bool> isAbundantNumber;
+    isAbundantNumber.push_back(false);
+    isAbundantNumber.push_back(false);
+    
+    // array of abundant numbers below max
+    vector<int> abundantNumbers;
+    
+    for(int i=2; i<max; i++)
+    {
+        unordered_set<int> &divisors = mapOfDivisors[i];
+        
+        int sum = 0;
+        unordered_set<int>::const_iterator divItr = divisors.begin();
+        for(; divItr != divisors.end(); ++divItr)
+        {
+            sum += *divItr;
+        }
+        
+        sumOfDivisors.push_back(sum);
+        
+        if(sum > i)
+        {
+            isAbundantNumber.push_back(true);
+            abundantNumbers.push_back(i);
+        }
+        else
+            isAbundantNumber.push_back(false);
+    }
+    
+    // using the knowledge that 12 is the smallest abundant number
+    int smallestAbundant = 12;
+    
+    // using the knowledge that 24 is smallest number which can be expressed as a sum of two abundant numbers
+    int sumOfnumbers = 23*24/2;     // (adding 1 to 23)
+    
+    for(int i=25; i<max; i++)
+    {
+        vector<int>::const_iterator itr = abundantNumbers.begin();
+        for(; itr != abundantNumbers.end(); ++itr)
+        {
+            int secondNumber = i - (*itr);
+            
+            if(secondNumber < smallestAbundant)
+            {
+                // this number can not be expressed
+                sumOfnumbers += i;
+                break;
+            }
+            
+            // if second number is also an abundant number then break
+            if(isAbundantNumber[secondNumber])
+                break;
+        }
+    }
+    
+    cout<<sumOfnumbers<<endl;
+}
 
 /*************************************************************************************************
  *************************************************************************************************/
@@ -986,7 +1274,7 @@ void Euler67()
 
 int main(int argc, const char * argv[]) {
     
-    Euler67();
+    Euler23();
     
     return 0;
 }
