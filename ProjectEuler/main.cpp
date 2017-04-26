@@ -1276,10 +1276,261 @@ void Euler24()
 /*************************************************************************************************
  *************************************************************************************************/
 
+void Euler25()
+{
+    vector<int> digits1 = longNumber(1);
+    vector<int> digits2 = longNumber(1);
+    
+    long currentIdx = 2;
+    
+    while(1)
+    {
+        vector<int> result;
+        
+        // add the last two numbers
+        vector<vector<int>> numbers = {digits1, digits2};
+        
+        result = longAdd(numbers);
+        currentIdx++;
+        
+        if(result.size()>999)
+            break;
+        
+        digits1 = digits2;
+        digits2 = result;
+    }
+    
+    cout<<currentIdx<<endl;
+}
 
 /*************************************************************************************************
  *************************************************************************************************/
 
+void Euler27()
+{
+    // for the given problem it is very easy to see that b is a prime and a is an odd number
+    // for simplicity we will assume that both are more than 3
+    
+    // this is the maximum length of quadratic prime sequence
+    int maxL = 1;
+    int maxA = 3;
+    int maxB = 3;
+
+    // for simplicity and fast results we will maintain two sets, one for primes and one for composites
+    unordered_set<int> primes = {2,3,5,7};
+    unordered_set<int> composites = {1,4,6,8,9};
+    
+    // for fast working prepare a set of primes less than 1000
+    set<int> primesLessThan1000 = {2,3,5,7};
+    
+    for(int i=8; i<1000; i++)
+    {
+        if(testPrimality(i))
+        {
+            primesLessThan1000.insert(i);
+            primes.insert(i);
+        }
+    }
+    
+    // now iterate over a & b
+    set<int>::const_iterator primesItr = primesLessThan1000.begin();
+    primesItr++;            // skipping prime number 2
+    for(; primesItr != primesLessThan1000.end(); ++primesItr)
+    {
+        int B = *primesItr;
+        for(int a=3; a<1000; a += 2)
+        {
+            // need to test for both positive and negative values of a
+            for(int inv = 1; inv>-2; inv -= 2)
+            {
+                int A = a*inv;
+                
+                int n=1;
+                while(1)
+                {
+                    int quad = n*n + n*A + B;
+                    
+                    // if negative then break staright away
+                    if(quad < 0)
+                        break;
+                    
+                    // check if this prime already found
+                    if(primes.find(quad) != primes.end())
+                    {
+                        n++;
+                    }
+                    else if(composites.find(quad) != composites.end())
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        // see if this is a prime
+                        if(testPrimality(quad))
+                        {
+                            primes.insert(quad);
+                            n++;
+                        }
+                        else
+                        {
+                            composites.insert(quad);
+                            break;
+                        }
+                    }
+                }
+                
+                if(n > maxL)
+                {
+                    maxL = n;
+                    maxA = A;
+                    maxB = B;
+                }
+            }
+        }
+    }
+    
+    cout<<maxA*maxB<<endl;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+void Euler28()
+{
+    int sumOfDiagnols = 1;
+    
+    int lastNum = 1;
+    for(int i=2; i<1001; i+=2)
+    {
+        for(int j=0; j<4; j++)
+        {
+            lastNum += i;
+            sumOfDiagnols += lastNum;
+        }
+    }
+    
+    cout<<sumOfDiagnols<<endl;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+int power(int x, unsigned int y)
+{
+    int temp;
+    
+    if( y == 0)
+        return 1;
+    
+    if(y==1)
+        return x;
+    
+    temp = power(x, y/2);
+    if (y%2 == 0)
+        return temp*temp;
+    else
+        return x*temp*temp;
+}
+
+void Euler29()
+{
+    int max = 101;
+    
+    // prepare the divisors map uptil max number
+    // create the divisors map
+    unordered_map<int, unordered_set<int>> mapOfDivisors;
+    for(int i=2; i<max; i++)
+    {
+        getDivisors(i, mapOfDivisors);
+    }
+    
+    int uniqueCount = (max-2)*(max-2);
+    
+    for(int i=2; i<sqrt(max); i++)
+    {
+        for(int j=2; j<max; j++)
+        {
+            // find the factors of power
+            unordered_map<int, unordered_set<int>>::const_iterator itr = mapOfDivisors.find(j);
+            if(itr == mapOfDivisors.end())
+            {
+                // can not happen
+                cout<<"bug"<<endl;
+                return;
+            }
+            
+            if(itr->second.size() == 1)
+            {
+                // this is a prime number so no need to process it further
+                continue;
+            }
+            
+            // iterate over the divisors of this number
+            unordered_set<int>::const_iterator divItr = itr->second.begin();
+            for(; divItr != itr->second.end(); ++divItr)
+            {
+                if(*divItr == 1)
+                    continue;
+                
+                // sanity check on value of factor num ^ factor< max
+                if(*divItr > 6)
+                    continue;
+                
+                // this is the number and the power
+                int num = power(i, *divItr);
+                //int power = j/(*divItr);
+                
+                if(num < max)
+                {
+                  uniqueCount--;
+                }
+            }
+        }
+    }
+
+    cout<<uniqueCount<<endl;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+void Euler30()
+{
+    // this map will store digits power
+    unordered_map<int, int> digitsPower;
+    for(int i=0; i<10; i++)
+    {
+        digitsPower.insert(pair<int, int>(i, i*i*i*i*i));
+    }
+    
+    // upper limit created by maximum digit value
+    int upper = 6*digitsPower.find(9)->second;
+    
+    // this is the sum to be found
+    int sum = 0;
+    
+    for(int i=2; i<upper; i++)
+    {
+        int sumOfDigitsPower = 0;
+        int num = i;
+        while(num>0)
+        {
+            sumOfDigitsPower += digitsPower.find(num%10)->second;
+            num /= 10;
+        }
+        
+        if(sumOfDigitsPower == i)
+            sum += i;
+    }
+    
+    cout<<sum<<endl;
+}
+
+/*************************************************************************************************
+ *************************************************************************************************/
+
+/*************************************************************************************************
+ *************************************************************************************************/
 
 /*************************************************************************************************
  *************************************************************************************************/
@@ -1328,7 +1579,7 @@ void Euler67()
 
 int main(int argc, const char * argv[]) {
     
-    Euler24();
+    Euler30();
     
     return 0;
 }
