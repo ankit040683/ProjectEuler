@@ -15,7 +15,11 @@
 #include <queue>
 #include <deque>
 #include <stack>
+#include <array>
 #include "math.h"
+#include <chrono>
+#include <thread>
+#include <future>
 
 using namespace std;
 
@@ -1024,7 +1028,7 @@ void Euler22()
     FILE* fp = NULL;
     fp = fopen("p022_names.txt", "r");
     
-    char cc;
+    char cc = '\0';
     // vector of all names in file
     vector<string> names;
     
@@ -1529,8 +1533,111 @@ void Euler30()
 /*************************************************************************************************
  *************************************************************************************************/
 
+int findCounts(int amount, int topValue, std::map<int, int> &mapDenominations, unordered_map<int, unordered_map<int, int>> &mapCombinations)
+{
+    // get the key corresponding to top value
+    std::map<int, int>::const_iterator itrValue = mapDenominations.find(topValue);
+    if(itrValue == mapDenominations.end())
+    {
+        // can not happen
+        cout<<"bug"<<endl;
+        return 0;
+    }
+    
+    int sumDenominations = itrValue->second;
+    
+    // first, find the maps for denominations
+    unordered_map<int, unordered_map<int, int>>::iterator itrDenomination = mapCombinations.find(sumDenominations);
+    if(itrDenomination == mapCombinations.end())
+    {
+        // can not happen
+        cout<<"bug"<<endl;
+        return 0;
+    }
+    
+    // see if the amount is previously calculated already
+    unordered_map<int, int>::const_iterator itrCombination = itrDenomination->second.find(amount);
+    if(itrCombination != itrDenomination->second.end())
+        return itrCombination->second;
+
+    // amount is not calculated previously, so need to calculate it
+    int count = 0;
+    
+    // check if we are at the begining of maps
+    if(itrValue == mapDenominations.begin())
+    {
+        // we have to evaluate amount using only 2 & 1 coins
+        count = 1 + amount/2;
+    }
+    else
+    {
+        // find the previous value
+        --itrValue;
+        
+        // corresponding to these find the map and value
+        int top = itrValue->first;
+        
+        // now iterate and find values
+        int max = amount%top==0 ? (amount/top) : 1+amount/top;
+        for(int i=0; i<max; i++)
+        {
+            int localCount = findCounts(amount - i*top, top, mapDenominations, mapCombinations);
+            count += localCount;
+        }
+        
+        if(amount%top==0)
+            count++;
+    }
+    
+    //  add this is the cobination map
+    itrDenomination->second.insert( make_pair(amount, count) );
+    
+    return count;
+}
+
+void Euler31()
+{
+    // coins 1,2,5,10,20,50,100,200
+    
+    // this is the map of highest denomination vs sum of all less than that
+    std::map<int, int> mapDenominations = { {5,3}, {10,8}, {20,18}, {50,38}, {100,88}, {200,188} };
+
+    // this map will store all the denominations map
+    std::unordered_map<int, std::unordered_map<int, int>> mapCombinations;
+    
+    // fill this map with maps
+    std::map<int, int>::const_iterator itr = mapDenominations.begin();
+    for(; itr != mapDenominations.end(); ++itr)
+    {
+        mapCombinations.insert( make_pair(itr->second, unordered_map<int, int>() ) );
+    }
+    
+    int val = findCounts(200, 200, mapDenominations, mapCombinations);
+    cout<<val+1<<endl;
+}
+
 /*************************************************************************************************
  *************************************************************************************************/
+
+void Euler33()
+{
+    for(int i=1; i<10; i++)
+    {
+        for(int j=1; j<10; j++)
+        {
+            if(i==j)
+                continue;
+            
+            if( (9*i*j) % (10*j-i) == 0 )
+            {
+                // we have a winner
+                int k = (9*i*j)/(10*j-i);
+                if(k<10)
+                    cout<<j<<k<<" "<<k<<i<<endl;
+            }
+        }
+    }
+}
 
 /*************************************************************************************************
  *************************************************************************************************/
@@ -1578,8 +1685,9 @@ void Euler67()
  *************************************************************************************************/
 
 int main(int argc, const char * argv[]) {
-    
-    Euler30();
-    
+
+    Euler33();
+
     return 0;
 }
+
